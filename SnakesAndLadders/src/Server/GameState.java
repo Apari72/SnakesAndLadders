@@ -15,8 +15,7 @@ public class GameState {
             Map.entry(95, 75), Map.entry(98, 79)
     );
 
-
-    public GameState(ArrayList<ClientHandler> clients) {
+    public GameState(List<ClientHandler> clients) {
         this.players = new ClientHandler[] { clients.get(0), clients.get(1) };
         this.positions = new int[] { 0, 0 };
         this.currentPlayer = 0;
@@ -30,22 +29,27 @@ public class GameState {
     public synchronized void handlePlayerInput(int playerId, String input) {
         if (playerId != currentPlayer) return;
 
-        if (input.equalsIgnoreCase("ROLL")) {
+        if ("ROLL".equalsIgnoreCase(input.trim())) {
             int roll = new Random().nextInt(6) + 1;
             positions[playerId] += roll;
             if (positions[playerId] > 100) positions[playerId] = 100;
 
-            // Snakes or Ladders
-            positions[playerId] = snakesAndLadders.getOrDefault(positions[playerId], positions[playerId]);
+            // Apply snake or ladder
+            positions[playerId] = snakesAndLadders.getOrDefault(
+                    positions[playerId], positions[playerId]
+            );
+            int finalPos = positions[playerId];
 
-            broadcast("Player " + (playerId + 1) + " rolled a " + roll + " and moved to " + positions[playerId]);
+            // Structured broadcast for client animation
+            broadcast("PLAYER_MOVE:" + (playerId+1) + ":" + roll + ":" + finalPos);
 
-            if (positions[playerId] == 100) {
-                broadcast("Player " + (playerId + 1) + " WINS!");
+            // Victory check
+            if (finalPos == 100) {
+                broadcast("Player " + (playerId+1) + " WINS!");
                 return;
             }
 
-            // Switch turn
+            // Next player's turn
             currentPlayer = (currentPlayer + 1) % 2;
             players[currentPlayer].sendMessage("YOUR_TURN");
         }

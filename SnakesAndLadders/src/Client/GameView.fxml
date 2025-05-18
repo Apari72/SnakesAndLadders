@@ -21,10 +21,10 @@
 
     <!-- Center – Game Board Panel -->
     <center>
-        <Pane fx:id="boardPane"
-              prefWidth="500.0" prefHeight="500.0"
-              style="-fx-background-color: lightblue; -fx-border-color: black;"/>
+        <fx:include fx:id="boardPane" source="BoardPane.fxml"/>
     </center>
+
+
 
     <!-- Bottom – Controls -->
     <bottom>
@@ -32,12 +32,11 @@
             <padding>
                 <Insets top="10" right="10" bottom="10" left="10"/>
             </padding>
-            <Button text="Roll Dice"
-                    fx:id="rollButton"
-                    onAction="#handleRollDice"/>
-            <Label fx:id="statusLabel"
-                   text="Waiting for server..."/>
+            <Button text="Roll Dice" fx:id="rollButton" onAction="#handleRollDice"/>
+
+            <Label fx:id="statusLabel" text="Waiting for server..."/>
         </HBox>
+
     </bottom>
 
 </BorderPane>

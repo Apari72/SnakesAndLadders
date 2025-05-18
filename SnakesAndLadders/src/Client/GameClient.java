@@ -25,7 +25,11 @@ public class GameClient extends Application {
 
         // Get controller and set connection
         GameController controller = loader.getController();
-        controller.setConnection(socket, in, out);
+        NetworkManager networkManager = new NetworkManager(socket, in, out);
+        controller.setConnection(networkManager);
+        networkManager.setMessageListener(controller::handleServerMessage);
+
+
 
         // Show window
         stage.setTitle("Snakes and Ladders");
