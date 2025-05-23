@@ -15,7 +15,7 @@ public class GameClient extends Application {
     @Override
     public void start(Stage stage) throws Exception {
         // Connect to server
-        Socket socket = new Socket("127.0.0.1", 12345); // replace with AWS IP for deployment
+        Socket socket = new Socket("127.0.0.1", 12345);
         BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
 
@@ -29,25 +29,10 @@ public class GameClient extends Application {
         controller.setConnection(networkManager);
         networkManager.setMessageListener(controller::handleServerMessage);
 
-
-
         // Show window
         stage.setTitle("Snakes and Ladders");
         stage.setScene(scene);
         stage.show();
-
-        // Start a thread to read messages from server
-        new Thread(() -> {
-            try {
-                String line;
-                while ((line = in.readLine()) != null) {
-                    String finalLine = line;
-                    javafx.application.Platform.runLater(() -> controller.handleServerMessage(finalLine));
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }).start();
     }
 
     public static void main(String[] args) {

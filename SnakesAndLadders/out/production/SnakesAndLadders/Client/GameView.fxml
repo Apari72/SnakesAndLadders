@@ -33,6 +33,10 @@
                 <Insets top="10" right="10" bottom="10" left="10"/>
             </padding>
             <Button text="Roll Dice" fx:id="rollButton" onAction="#handleRollDice"/>
+            <Button fx:id="restartButton"
+                    text="Restart"
+                    onAction="#handleRestart"
+                    disable="true"/>
 
             <Label fx:id="statusLabel" text="Waiting for server..."/>
         </HBox>

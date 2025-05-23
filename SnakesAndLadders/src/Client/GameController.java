@@ -8,9 +8,12 @@ import javafx.scene.control.Label;
 public class GameController {
     @FXML private Label statusLabel;
     @FXML private Button rollButton;
+    @FXML private Button restartButton;
     @FXML private BoardPane boardPane;
 
     private NetworkManager networkManager;
+
+    public GameController() { }
 
     public void setConnection(NetworkManager networkManager) {
         this.networkManager = networkManager;
@@ -20,6 +23,7 @@ public class GameController {
     private void initialize() {
         statusLabel.setText("Waiting for players...");
         rollButton.setDisable(true);
+        restartButton.setDisable(true);
     }
 
     @FXML
@@ -31,6 +35,15 @@ public class GameController {
         }
     }
 
+    @FXML
+    private void handleRestart() {
+        if (networkManager != null) {
+            networkManager.sendMessage("RESTART_REQUEST");
+            restartButton.setDisable(true);
+            statusLabel.setText("Restart requested. Waiting for opponent...");
+        }
+    }
+
     public void handleServerMessage(String message) {
         Platform.runLater(() -> {
             if ("YOUR_TURN".equals(message)) {
@@ -38,22 +51,32 @@ public class GameController {
                 rollButton.setDisable(false);
 
             } else if (message.startsWith("PLAYER_MOVE:")) {
-                // Format: PLAYER_MOVE:<pid>:<roll>:<finalDest>
                 String[] parts = message.split(":");
                 int pid  = Integer.parseInt(parts[1]);
                 int roll = Integer.parseInt(parts[2]);
                 int dest = Integer.parseInt(parts[3]);
-                statusLabel.setText(
-                        "Player " + pid + " rolled " + roll + " → " + dest
-                );
+                statusLabel.setText("Player " + pid + " rolled " + roll + " → " + dest);
                 boardPane.animatePlayerMove(pid, roll, dest);
 
-            } else if (message.endsWith("WINS!")) {
-                statusLabel.setText(message);
+            } else if (message.startsWith("Winner: ")) {
+                int winner = Integer.parseInt(message.split(":")[1].trim());
+
+                statusLabel.setText("Player " + winner + " wins! Restart?");
                 rollButton.setDisable(true);
+                restartButton.setDisable(false);
+
+            } else if (message.startsWith("RESTART_VOTE:")) {
+                int voter = Integer.parseInt(message.split(":")[1]);
+                statusLabel.setText("Player " + voter + " is ready to restart.");
+
+            } else if ("GAME_RESET".equals(message)) {
+                boardPane.resetAllTokens();
+                statusLabel.setText("Game reset! Waiting for your turn...");
+                rollButton.setDisable(true);
+                restartButton.setDisable(true);
 
             } else {
-                // Other messages
+                // Other broadcasts like welcome messages
                 statusLabel.setText(message);
             }
         });
